@@ -209,7 +209,7 @@ class Tabula(sparkSession: SparkSession, inputTableName: String, totalCount: Lon
         |SELECT $cubedAttributesString, (${cubeLocalMeasureName(0)+"sum"}/${cubeLocalMeasureName(0)+"count"}) AS ${cubeLocalMeasureName(0)}
         |FROM ${tempTableNameDryrun+"intermediatetable"}
       """.stripMargin).filter(s"${cubeLocalMeasureName(0)} > ${icebergThreshold}")
-    dryrunDf
+    dryrunDf // 上次调试的断点位置 搞懂 dryrunDf 目标内容
   }
 
   def equalityJoin(cubeTable1:DataFrame, cubeTable2:DataFrame, final_threshold: Double):DataFrame = {
