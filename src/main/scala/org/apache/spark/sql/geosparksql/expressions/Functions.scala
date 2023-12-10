@@ -493,6 +493,25 @@ case class CB_EuclideanLoss_Spatial(inputExpressions: Seq[Expression])
   override def children: Seq[Expression] = inputExpressions
 }
 
+/**
+ * 这段代码定义了一个名为CB_Min_Distance_Spatial的 case class，
+ * 它实现了Spark的Expression trait，并且还包括了CodegenFallback、Logging和SerializableUdf的功能。
+ *
+ * 这个类的作用是用于计算空间中的最小距离。具体功能如下：
+ *
+ * nullable方法返回false，表示该表达式的结果不会为空。
+ * eval方法用于计算表达式的值，首先对输入进行断言检查，然后获取输入表达式的值，并将其
+ *  转换为相应的数据类型。接着调用min_distance_Spatial函数计算空间中的最小距离。
+ * dataType方法返回表达式的数据类型，这里是DoubleType，表示计算结果为双精度浮点数。
+ * children方法返回输入表达式的序列。
+ *
+ * 总的来说，这段代码定义了一个用于计算空间中最小距离的表达式类，它接受两个输入表达式，
+ * 分别是空间点的坐标和样本集合，然后计算空间点与样本集合中各点之间的最小距离。
+ *
+ * Min_Distance_Spatial(x, s) = MIN(distance(x, s))
+ *
+ * @param inputExpressions
+ */
 case class CB_Min_Distance_Spatial(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with Logging with SerializableUdf {
   override def nullable: Boolean = false

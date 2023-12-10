@@ -73,6 +73,7 @@ object Driver extends App {
 
   /**
     * Build Tabula, a partially materialized sampling cube
+    * 构建采样立方体时，使用的了两个维度
     */
   def buildTabula(): Unit ={
     // Load data from disk or HDFS

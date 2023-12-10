@@ -39,8 +39,57 @@
         <scala.compat.version>2.11</scala.compat.version>
         <geotools.version>17.0</geotools.version>
         <spark.version>2.3.2</spark.version>
-        <env.package>provided</env.package>
+        <!-- <env.package>provided</env.package> -->
+        <env.package>compile</env.package>
     </properties>
+
+    <repositories>
+        <!-- <repository> -->
+        <!--     <id>central</id> -->
+        <!--     <name>ali maven</name> -->
+        <!--     <url>https://maven.aliyun.com/repository/public</url> -->
+        <!--     <layout>default</layout> -->
+        <!--     &lt;!&ndash; 是否开启发布版构件下载 &ndash;&gt; -->
+        <!--     <releases> -->
+        <!--         <enabled>true</enabled> -->
+        <!--     </releases> -->
+        <!--     &lt;!&ndash; 是否开启快照版构件下载 &ndash;&gt; -->
+        <!--     <snapshots> -->
+        <!--         <enabled>false</enabled> -->
+        <!--     </snapshots> -->
+        <!-- </repository> -->
+
+        <!-- 镜像仓库 -->
+        <repository>
+            <id>cloudera</id>
+            <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+        </repository>
+        <!--        <repository>-->
+        <!--            <id>jboss</id>-->
+        <!--            <url>https://repository.jboss.com/nexus/content/groups/public</url>-->
+        <!--        </repository>-->
+        <repository>
+            <id>maven_central</id>
+            <name>Maven Central</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </repository>
+        <!-- geotools -->
+        <repository>
+            <id>osgeo</id>
+            <url>https://repo.osgeo.org/repository/release</url>
+        </repository>
+        <!-- confluent -->
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </repository>
+        <!-- scalatest SuperSafe Community Edition -->
+        <repository>
+            <id>artima</id>
+            <name>Artima Maven Repository</name>
+            <url>https://repo.artima.com/releases</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
