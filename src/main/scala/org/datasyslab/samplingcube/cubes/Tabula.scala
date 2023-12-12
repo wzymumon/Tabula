@@ -73,6 +73,9 @@ class Tabula(sparkSession: SparkSession, inputTableName: String, totalCount: Lon
     /** ****************************************
       * Stage 1: Dry run stage
       * ****************************************/
+
+    // 在这种情况下，用户可以将精度损失实现为样本和原始数据之间的平均最小距离
+    // dryrunDf 中是精度损失超过了阈值的冰山单元
     var dryrunDf = dryrunWithEuclidean(cubedAttributes, sampledAttribute, icebergThreshold)
     // Persist the dryrun result on disk because Spark has a bug that will lead to infinite loop
     dryrunDf.write.mode(SaveMode.Overwrite).option("header", "true").csv(cubeTableLocation + "-" + tempTableNameDryrun)
@@ -186,6 +189,14 @@ class Tabula(sparkSession: SparkSession, inputTableName: String, totalCount: Lon
     return edges
   }
 
+
+  /**
+   * 立方体查找阶段，获取
+   * @param cubedAttributes
+   * @param sampledAttribute
+   * @param icebergThreshold
+   * @return
+   */
   def dryrunWithEuclidean(cubedAttributes: Seq[String], sampledAttribute: String, icebergThreshold: Double): DataFrame = {
 //    this.globalSample = drawGlobalSample(sampledAttribute, qualityAttribute, icebergThresholds(0))
     var cubedAttributesString = cubedAttributes.mkString(",")
@@ -204,6 +215,8 @@ class Tabula(sparkSession: SparkSession, inputTableName: String, totalCount: Lon
          |GROUP BY CUBE($cubedAttributesString)
       """.stripMargin)
     tempDf.createOrReplaceTempView(tempTableNameDryrun+"intermediatetable")
+
+    // 过滤，获取误差阈值大于icebergThreshold的冰山单元
     var dryrunDf = sparkSession.sql(
       s"""
         |SELECT $cubedAttributesString, (${cubeLocalMeasureName(0)+"sum"}/${cubeLocalMeasureName(0)+"count"}) AS ${cubeLocalMeasureName(0)}

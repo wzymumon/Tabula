@@ -351,6 +351,13 @@ trait SerializableUdf extends GlobalVariables{
     new SimplePoint(coordinate(0).toDouble, coordinate(1).toDouble)
   }
 
+  /**
+   * 计算全局样本集的大小，需要根据数据的分布情况进行调整
+   * @param count
+   * @param epsilon
+   * @param delta
+   * @return
+   */
   def calSampleSize(count:Long, epsilon: Double, delta:Double): Int = {
     val dominator = 2.0*Math.pow(epsilon, 2)/Math.log(2.0/delta) + 1.0/count
     Math.ceil(1.0/dominator).toInt
