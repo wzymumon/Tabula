@@ -163,7 +163,13 @@ class Tabula(sparkSession: SparkSession, inputTableName: String, totalCount: Lon
     return (cubeTable, sampleTable, sparkSession.table(tempTableNameGLobalSample).rdd.map(f => f.getAs[SimplePoint](0)))//.withColumn(cubeSampleColName, stringify(col(cubeSampleColName))))
   }
 
-
+    /**
+      * 样本选择算法
+      * @param cubeTable
+     * @param icebergThreshold
+     * @param cubeAttributes
+     * @return
+     */
   private def sampleSelection(cubeTable: DataFrame, icebergThreshold: Double, cubeAttributes:Seq[String]): util.List[Row] = {
     var cubeTable1 = cubeTable
     // Drop all useless column for the self join, reduce the partition number to a reasonable no.
@@ -201,6 +207,7 @@ class Tabula(sparkSession: SparkSession, inputTableName: String, totalCount: Lon
 //    this.globalSample = drawGlobalSample(sampledAttribute, qualityAttribute, icebergThresholds(0))
     var cubedAttributesString = cubedAttributes.mkString(",")
     var globalSampleString = globalSample.mkString(",")
+    //  CB_Min_Distance_Spatial 为计算空间点（Raw）与样本数据（Sample_points）之间的最小距离
     var topCuboid = sparkSession.sql(
       s"""
          |SELECT $cubedAttributesString, sum(CB_Min_Distance_Spatial($sampledAttribute, '$globalSampleString')) AS ${cubeLocalMeasureName(0)+"sum"}, count(*) AS ${cubeLocalMeasureName(0)+"count"}
@@ -208,6 +215,8 @@ class Tabula(sparkSession: SparkSession, inputTableName: String, totalCount: Lon
          |GROUP BY $cubedAttributesString
       """.stripMargin)
     topCuboid.createOrReplaceTempView(tempTableNameDryrun+"topcuboid")
+    // 获取所有的对应数据列
+    // 基于 topcuboid, 通过 cube()操作 获取其他的聚合值，例如 （vendor_name:null,passenger_count:1）,对应于所有满足的乘客为1，供应商不限的情况
     var tempDf = sparkSession.sql(
       s"""
          |SELECT $cubedAttributesString, sum(${cubeLocalMeasureName(0)+"sum"}) AS ${cubeLocalMeasureName(0)+"sum"}, sum(${cubeLocalMeasureName(0)+"count"}) AS ${cubeLocalMeasureName(0)+"count"}
@@ -216,13 +225,13 @@ class Tabula(sparkSession: SparkSession, inputTableName: String, totalCount: Lon
       """.stripMargin)
     tempDf.createOrReplaceTempView(tempTableNameDryrun+"intermediatetable")
 
-    // 过滤，获取误差阈值大于icebergThreshold的冰山单元
+    // 通过 sum/count 获取不同单元的平均最小距离（即精度损失），再过滤得到获取误差阈值大于 icebergThreshold 的冰山单元
     var dryrunDf = sparkSession.sql(
       s"""
         |SELECT $cubedAttributesString, (${cubeLocalMeasureName(0)+"sum"}/${cubeLocalMeasureName(0)+"count"}) AS ${cubeLocalMeasureName(0)}
         |FROM ${tempTableNameDryrun+"intermediatetable"}
       """.stripMargin).filter(s"${cubeLocalMeasureName(0)} > ${icebergThreshold}")
-    dryrunDf // 上次调试的断点位置 搞懂 dryrunDf 目标内容
+    return dryrunDf // 上次调试的断点位置 搞懂 dryrunDf 目标内容
   }
 
   def equalityJoin(cubeTable1:DataFrame, cubeTable2:DataFrame, final_threshold: Double):DataFrame = {

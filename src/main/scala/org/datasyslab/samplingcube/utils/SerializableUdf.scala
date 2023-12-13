@@ -89,6 +89,12 @@ trait SerializableUdf extends GlobalVariables{
     sum
   }
 
+  /**
+   * 计算原始数据与样本数据之间的平均距离
+   * @param rawObject
+   * @param sample
+   * @return
+   */
   def min_distance_Spatial(rawObject: SimplePoint, sample:Array[SimplePoint]): Double = {
     var minDist = -1.0
     sample.foreach(g=> {

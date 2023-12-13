@@ -520,6 +520,7 @@ case class CB_Min_Distance_Spatial(inputExpressions: Seq[Expression])
     assert(inputExpressions.length == 2)
     var rawArray = inputExpressions(0).eval(input).asInstanceOf[ArrayData].toDoubleArray()
     var rawObject = new SimplePoint(rawArray(0), rawArray(1))
+    // 处理连续空间数据，比如 "-73.981 40.764, -73.999 40.725" 可以转为两个空间点
     var sampleSet = inputExpressions(1).eval(input).asInstanceOf[UTF8String].toString.split(",").map(f=>toSimplePoint(f))
     min_distance_Spatial(rawObject, sampleSet)
   }
